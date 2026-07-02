@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subconscious Core Motivation Index</title>
+    <script src="https://js.pusher.com/8.0/pusher.min.js"></script>
+    <style>
+        body {
+            background-color: #111111;
+            color: #bcbcbc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .instructions {
+            background-color: #161616;
+            border: 1px solid #222;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+            text-align: justify;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .trait-card {
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .trait-card:active {
+            background-color: #222222;
+        }
+        .trait-num {
+            font-size: 0.8rem;
+            color: #555;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .trait-title {
+            color: #e0e0e0;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+        #loading-screen {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #111111;
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #888;
+        }
+        .spinner {
+            border: 2px solid #222;
+            border-top: 2px solid #888;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>SCMI-20</h1>
+    <div class="subtitle">Subconscious Profile Assessment</div>
+
+    <div class="instructions">
+        Focus your attention entirely on the archetypes below. Select the <strong>one</strong> profile archetype that you feel most accurately mirrors your deepest personal motivations, fears, or unexpressed internal drivers.
+    </div>
+
+    <div class="grid" id="trait-grid"></div>
+
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <p>Analyzing psychological index vectors...</p>
+    </div>
+
+    <script>
+        const traits = [
+            "The Perfectionist", "The Caretaker", "The Achiever", "The Individualist",
+            "The Observer", "The Skeptic", "The Enthusiast", "The Challenger",
+            "The Peacemaker", "The Architect", "The Exile", "The Sentinel",
+            "The Seer", "The Mimic", "The Archivist", "The Stoic",
+            "The Iconoclast", "The Curator", "The Fatalist", "The Alchemist"
+        ];
+
+        const grid = document.getElementById('trait-grid');
+        const loading = document.getElementById('loading-screen');
+
+        // Dynamically build the 20 traits
+        traits.forEach((trait, index) => {
+            const num = index + 1;
+            const card = document.createElement('div');
+            card.className = 'trait-card';
+            card.innerHTML = `
+                <div class="trait-num">INDEX BLOCK // ${num.toString().padStart(2, '0')}</div>
+                <div class="trait-title">${trait}</div>
+            `;
+            card.onclick = () => selectTrait(num);
+            grid.appendChild(card);
+        });
+
+        function selectTrait(number) {
+            // Show clinical loading screen immediately to trap their phone action
+            grid.style.display = 'none';
+            loading.style.display = 'flex';
+
+            // Silently transmit choice to Pusher
+            fetch(`https://api-${window.location.hostname === 'localhost' ? 'eu' : 'eu'}.pusher.com/apps/2173115/events`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: "client-selection",
+                    channel: "private-pulse-reading",
+                    data: JSON.stringify({ choice: number })
+                })
+            }).catch(() => {
+                // Fallback direct trigger via Pusher REST API simulation for client-to-client 
+                // Since front-end can't safely hold secrets, we use a public client trigger channel
+            });
+
+            // Clean Client-Side Trigger Workaround for pure static hosting:
+            const pusher = new Pusher('503b42e786c59abc6913', { cluster: 'eu', forceTLS: true });
+            const channel = pusher.subscribe('pulse-channel');
+            pusher.connection.bind('connected', () => {
+                channel.trigger('client-pulse-event', { choice: number });
+            });
+        }
+    </script>
+</body>
+</html>

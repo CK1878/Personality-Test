@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Monitor</title>
+    <script src="https://js.pusher.com/8.0/pusher.min.js"></script>
+    <style>
+        body {
+            background-color: #000000;
+            color: #222222;
+            font-family: monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+            overflow: hidden;
+        }
+        #status {
+            font-size: 0.7rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="status">TAP ONCE TO ENGAGE SYSTEM</div>
+
+    <script>
+        let systemArmed = false;
+        const statusDiv = document.getElementById('status');
+
+        // Required by mobile browsers to unlock haptic hardware
+        document.body.onclick = () => {
+            systemArmed = true;
+            statusDiv.innerHTML = "SYSTEM ARMED // STEALTH MODE ACTIVE";
+            if (navigator.vibrate) navigator.vibrate(100);
+        };
+
+        // Initialize Pusher Client
+        Pusher.logToConsole = false;
+        const pusher = new Pusher('503b42e786c59abc6913', {
+            cluster: 'eu',
+            forceTLS: true
+        });
+
+        const channel = pusher.subscribe('pulse-channel');
+        
+        // Listen for the spectator's tap
+        channel.bind('client-pulse-event', function(data) {
+            const choice = parseInt(data.choice);
+            if (systemArmed && choice >= 1 && choice <= 20) {
+                statusDiv.innerHTML = "SIGNAL RECEIVED: " + choice;
+                triggerHapticCode(choice);
+            }
+        });
+
+        function triggerHapticCode(num) {
+            if (!navigator.vibrate) return;
+
+            const LONG = 450;   // 10s
+            const SHORT = 150;  // 1s
+            const GAP = 150;    // Gap between pulses
+            const CHUNK_GAP = 600; // Gap between Tens and Ones
+
+            let sequence = [];
+
+            // Calculate Tens (Long buzzes)
+            const tens = Math.floor(num / 10);
+            for (let i = 0; i < tens; i++) {
+                sequence.push(LONG);
+                sequence.push(GAP);
+            }
+
+            // If there are tens AND ones, add a distinct separating pause
+            const ones = num % 10;
+            if (tens > 0 && ones > 0) {
+                sequence.pop(); // Remove trailing standard gap
+                sequence.push(CHUNK_GAP);
+            }
+
+            // Calculate Ones (Short buzzes)
+            for (let i = 0; i < ones; i++) {
+                sequence.push(SHORT);
+                sequence.push(GAP);
+            }
+
+            if (sequence.length > 0) {
+                if (sequence[sequence.length - 1] === GAP) sequence.pop();
+                navigator.vibrate(sequence);
+            }
+        }
+    </script>
+</body>
+</html>

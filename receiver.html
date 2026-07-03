@@ -8,7 +8,7 @@
     <style>
         body {
             background-color: #000000;
-            color: #222222;
+            color: #1a1a1a;
             font-family: monospace;
             display: flex;
             justify-content: center;
@@ -21,26 +21,26 @@
         #status {
             font-size: 0.7rem;
             text-align: center;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
 
-    <div id="status">TAP ONCE TO ENGAGE SYSTEM</div>
+    <div id="status">TAP ONCE TO ENGAGE MONITOR</div>
 
     <script>
         let systemArmed = false;
         const statusDiv = document.getElementById('status');
 
-        // Required by mobile browsers to unlock haptic hardware
+        // Required explicitly by mobile browsers to unlock physical vibration api
         document.body.onclick = () => {
             systemArmed = true;
-            statusDiv.innerHTML = "SYSTEM ARMED // STEALTH MODE ACTIVE";
-            if (navigator.vibrate) navigator.vibrate(100);
+            statusDiv.innerHTML = "MONITOR ARMED // RUNNING IN BACK DROP";
+            if (navigator.vibrate) navigator.vibrate(80);
         };
 
-        // Initialize Pusher Client
-        Pusher.logToConsole = false;
+        // Connect to your specific Pusher application instance
         const pusher = new Pusher('503b42e786c59abc6913', {
             cluster: 'eu',
             forceTLS: true
@@ -48,11 +48,12 @@
 
         const channel = pusher.subscribe('pulse-channel');
         
-        // Listen for the spectator's tap
+        // Listen directly for the spectator event
         channel.bind('client-pulse-event', function(data) {
             const choice = parseInt(data.choice);
             if (systemArmed && choice >= 1 && choice <= 20) {
-                statusDiv.innerHTML = "SIGNAL RECEIVED: " + choice;
+                // Silently write value to screen (useful for debugging, invisible in pocket)
+                statusDiv.innerHTML = "VECTOR ACQUIRED: " + choice;
                 triggerHapticCode(choice);
             }
         });
@@ -60,33 +61,34 @@
         function triggerHapticCode(num) {
             if (!navigator.vibrate) return;
 
-            const LONG = 450;   // 10s
-            const SHORT = 150;  // 1s
-            const GAP = 150;    // Gap between pulses
-            const CHUNK_GAP = 600; // Gap between Tens and Ones
+            const LONG = 450;      // 10s place pulse length
+            const SHORT = 150;     // 1s place pulse length
+            const GAP = 150;       // Gap between adjacent pulses
+            const CHUNK_GAP = 600;  // Gap separating Tens from Ones array
 
             let sequence = [];
 
-            // Calculate Tens (Long buzzes)
+            // Compile tens chunk structure
             const tens = Math.floor(num / 10);
             for (let i = 0; i < tens; i++) {
                 sequence.push(LONG);
                 sequence.push(GAP);
             }
 
-            // If there are tens AND ones, add a distinct separating pause
+            // Calculate separating break if both places exist
             const ones = num % 10;
             if (tens > 0 && ones > 0) {
-                sequence.pop(); // Remove trailing standard gap
+                sequence.pop(); 
                 sequence.push(CHUNK_GAP);
             }
 
-            // Calculate Ones (Short buzzes)
+            // Compile ones chunk structure
             for (let i = 0; i < ones; i++) {
                 sequence.push(SHORT);
                 sequence.push(GAP);
             }
 
+            // Clean trailing spaces and execute physical hardware pulse array
             if (sequence.length > 0) {
                 if (sequence[sequence.length - 1] === GAP) sequence.pop();
                 navigator.vibrate(sequence);

@@ -31,6 +31,25 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
+        .progress-bar {
+            height: 4px;
+            background-color: #222;
+            margin-bottom: 25px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #555;
+            width: 25%;
+            transition: width 0.4s ease;
+        }
+        .quiz-section {
+            display: none;
+        }
+        .quiz-section.active {
+            display: block;
+        }
         .instructions {
             background-color: #161616;
             border: 1px solid #222;
@@ -39,6 +58,19 @@
             font-size: 0.9rem;
             margin-bottom: 25px;
             text-align: justify;
+        }
+        .abstract-graphic {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px auto;
+            border: 1px dashed #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #444;
+            background-color: #141414;
         }
         .grid {
             display: grid;
@@ -66,6 +98,11 @@
             color: #e0e0e0;
             font-weight: 600;
             font-size: 1.05rem;
+        }
+        .trait-desc {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 5px;
         }
         #loading-screen {
             display: none;
@@ -98,11 +135,76 @@
     <h1>SCMI-20</h1>
     <div class="subtitle">Subconscious Profile Assessment</div>
 
-    <div class="instructions">
-        Focus your attention entirely on the archetypes below. Select the <strong>one</strong> profile archetype that you feel most accurately mirrors your deepest personal motivations, fears, or unexpressed internal drivers.
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
     </div>
 
-    <div class="grid" id="trait-grid"></div>
+    <!-- QUESTION 1 -->
+    <div class="quiz-section active" id="q1">
+        <div class="instructions">
+            <strong>Evaluation Vector 01/04:</strong> Look at the structural reference plot below. Select the concept that closest aligns with your initial, unforced cognitive recognition.
+        </div>
+        <div class="abstract-graphic">[ PLOT_09 ]</div>
+        <div class="grid">
+            <div class="trait-card" onclick="nextQuestion(2, '50%')">
+                <div class="trait-title">A symmetrical butterfly or moth structure</div>
+            </div>
+            <div class="trait-card" onclick="nextQuestion(2, '50%')">
+                <div class="trait-title">An approaching cloud formation or vapor wall</div>
+            </div>
+            <div class="trait-card" onclick="nextQuestion(2, '50%')">
+                <div class="trait-title">Two figures facing inward toward a central pillar</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUESTION 2 -->
+    <div class="quiz-section" id="q2">
+        <div class="instructions">
+            <strong>Evaluation Vector 02/04:</strong> In moments of unprovoked internal conflict, which behavioral anchor do you automatically fall back on?
+        </div>
+        <div class="grid">
+            <div class="trait-card" onclick="nextQuestion(3, '75%')">
+                <div class="trait-title">Logistical Analysis</div>
+                <div class="trait-desc">Detaching to break down environmental variables logically.</div>
+            </div>
+            <div class="trait-card" onclick="nextQuestion(3, '75%')">
+                <div class="trait-title">Intuitive Isolation</div>
+                <div class="trait-desc">Withdrawing inward to process chemical/emotional balance.</div>
+            </div>
+            <div class="trait-card" onclick="nextQuestion(3, '75%')">
+                <div class="trait-title">Vocal Redirection</div>
+                <div class="trait-desc">Communicating externally to diffuse tension through engagement.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUESTION 3 -->
+    <div class="quiz-section" id="q3">
+        <div class="instructions">
+            <strong>Evaluation Vector 03/04:</strong> Examine the abstract pattern coordinate. Identify the spatial element your eye is naturally drawn to first.
+        </div>
+        <div class="abstract-graphic">[ MATRIX_X ]</div>
+        <div class="grid">
+            <div class="trait-card" onclick="nextQuestion(4, '100%')">
+                <div class="trait-title">The dark, dense focal center point</div>
+            </div>
+            <div class="trait-card" onclick="nextQuestion(4, '100%')">
+                <div class="trait-title">The lighter, expanding negative space around the edges</div>
+            </div>
+            <div class="trait-card" onclick="nextQuestion(4, '100%')">
+                <div class="trait-title">The asymmetric breaks in the geometric lines</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN FINAL TRAIT SELECTION (QUESTION 4) -->
+    <div class="quiz-section" id="q4">
+        <div class="instructions">
+            <strong>Final Index Vector 04/04:</strong> Focus your attention entirely on the archetypes below. Select the <strong>one</strong> specific profile archetype that you feel most accurately mirrors your deepest personal motivations, secret fears, or unexpressed internal drivers.
+        </div>
+        <div class="grid" id="trait-grid"></div>
+    </div>
 
     <div id="loading-screen">
         <div class="spinner"></div>
@@ -111,46 +213,71 @@
 
     <script>
         const traits = [
-            "The Perfectionist", "The Caretaker", "The Achiever", "The Individualist",
-            "The Observer", "The Skeptic", "The Enthusiast", "The Challenger",
-            "The Peacemaker", "The Architect", "The Exile", "The Sentinel",
-            "The Seer", "The Mimic", "The Archivist", "The Stoic",
-            "The Iconoclast", "The Curator", "The Fatalist", "The Alchemist"
+            { name: "The Perfectionist", desc: "Driven by a fear of being flawed, corrupt, or fundamentally incorrect." },
+            { name: "The Caretaker", desc: "Needs to be needed by others; secretly fears being unwanted or cast aside." },
+            { name: "The Achiever", desc: "Identity is entirely tied to success and external metrics; fears worthlessness." },
+            { name: "The Individualist", desc: "Feels fundamentally different, unique, or quietly broken compared to others." },
+            { name: "The Observer", desc: "Retains internal energy; fears being completely overwhelmed by the outside world." },
+            { name: "The Skeptic", desc: "Constantly scanning environments for hidden dangers, agendas, or betrayal." },
+            { name: "The Enthusiast", desc: "Scared of missing out on experience; uses clutter and noise to escape pain." },
+            { name: "The Challenger", desc: "Must maintain absolute control of their environment; completely hides vulnerability." },
+            { name: "The Peacemaker", desc: "Avoids internal and external conflict at all costs; easily fades into the background." },
+            { name: "The Architect", desc: "Obsessed with building permanent systems, legacies, and leaving a lasting mark." },
+            { name: "The Exile", desc: "Deeply carries the internal feeling that they don't truly belong in their current life." },
+            { name: "The Sentinel", desc: "A hyper-vigilant protector who silently carries the psychological weight of everyone else." },
+            { name: "The Seer", desc: "Relies entirely on sharp, raw gut intuition, even when it completely defies logic." },
+            { name: "The Mimic", desc: "Subconsciously shifts traits and presentation depending on who they are standing next to." },
+            { name: "The Archivist", desc: "Hoards memories, physical objects, or past grievances; deeply struggles to let go." },
+            { name: "The Stoic", desc: "Completely detaches from heavy emotional processing to survive high-stress environments." },
+            { name: "The Iconoclast", desc: "Driven to tear down established rules and traditions, even if it results in self-destruction." },
+            { name: "The Curator", desc: "Obsessed with how their life appears from the outside; highly protective of their image." },
+            { name: "The Fatalist", desc: "Secretly believes everything is completely predetermined and out of their physical hands." },
+            { name: "The Alchemist", desc: "Constantly trying to transform past dark trauma or emotional pain into something useful." }
         ];
 
         const grid = document.getElementById('trait-grid');
         const loading = document.getElementById('loading-screen');
+        const progressFill = document.getElementById('progress');
 
-        // Dynamically build the 20 traits on screen
+        // Dynamically build the 20 traits with descriptions on the final page
         traits.forEach((trait, index) => {
             const num = index + 1;
             const card = document.createElement('div');
             card.className = 'trait-card';
             card.innerHTML = `
                 <div class="trait-num">INDEX BLOCK // ${num.toString().padStart(2, '0')}</div>
-                <div class="trait-title">${trait}</div>
+                <div class="trait-title">${trait.name}</div>
+                <div class="trait-desc">${trait.desc}</div>
             `;
             card.onclick = () => selectTrait(num);
             grid.appendChild(card);
         });
 
-        // Instantiate the connection globally so it's ready when tapped
+        // Initialize Pusher Client
         const pusher = new Pusher('503b42e786c59abc6913', { 
             cluster: 'eu', 
             forceTLS: true 
         });
         const channel = pusher.subscribe('pulse-channel');
 
+        function nextQuestion(nextNum, progressWidth) {
+            // Deactivate all sections, activate the targeted one
+            document.querySelectorAll('.quiz-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById('q' + nextNum).classList.add('active');
+            progressFill.style.width = progressWidth;
+            // Scroll back to top smoothly for mobile users
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function selectTrait(number) {
             // Lock out the interface instantly
-            grid.style.display = 'none';
+            document.getElementById('q4').style.display = 'none';
             loading.style.display = 'flex';
 
-            // Send via client-to-client connection over public channel parameters
+            // Send transmission to your secret device
             if (pusher.connection.state === 'connected') {
                 channel.trigger('client-pulse-event', { choice: number });
             } else {
-                // Safe connection fallback buffer if connection was dropped
                 pusher.connection.bind('connected', () => {
                     channel.trigger('client-pulse-event', { choice: number });
                 });

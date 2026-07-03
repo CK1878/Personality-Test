@@ -14,6 +14,7 @@
             max-width: 600px;
             margin: 0 auto;
             line-height: 1.6;
+            user-select: none;
         }
         h1 {
             color: #ffffff;
@@ -120,7 +121,7 @@
         const grid = document.getElementById('trait-grid');
         const loading = document.getElementById('loading-screen');
 
-        // Dynamically build the 20 traits
+        // Dynamically build the 20 traits on screen
         traits.forEach((trait, index) => {
             const num = index + 1;
             const card = document.createElement('div');
@@ -133,31 +134,27 @@
             grid.appendChild(card);
         });
 
+        // Instantiate the connection globally so it's ready when tapped
+        const pusher = new Pusher('503b42e786c59abc6913', { 
+            cluster: 'eu', 
+            forceTLS: true 
+        });
+        const channel = pusher.subscribe('pulse-channel');
+
         function selectTrait(number) {
-            // Show clinical loading screen immediately to trap their phone action
+            // Lock out the interface instantly
             grid.style.display = 'none';
             loading.style.display = 'flex';
 
-            // Silently transmit choice to Pusher
-            fetch(`https://api-${window.location.hostname === 'localhost' ? 'eu' : 'eu'}.pusher.com/apps/2173115/events`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: "client-selection",
-                    channel: "private-pulse-reading",
-                    data: JSON.stringify({ choice: number })
-                })
-            }).catch(() => {
-                // Fallback direct trigger via Pusher REST API simulation for client-to-client 
-                // Since front-end can't safely hold secrets, we use a public client trigger channel
-            });
-
-            // Clean Client-Side Trigger Workaround for pure static hosting:
-            const pusher = new Pusher('503b42e786c59abc6913', { cluster: 'eu', forceTLS: true });
-            const channel = pusher.subscribe('pulse-channel');
-            pusher.connection.bind('connected', () => {
+            // Send via client-to-client connection over public channel parameters
+            if (pusher.connection.state === 'connected') {
                 channel.trigger('client-pulse-event', { choice: number });
-            });
+            } else {
+                // Safe connection fallback buffer if connection was dropped
+                pusher.connection.bind('connected', () => {
+                    channel.trigger('client-pulse-event', { choice: number });
+                });
+            }
         }
     </script>
 </body>

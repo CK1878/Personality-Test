@@ -59,18 +59,12 @@
             margin-bottom: 25px;
             text-align: justify;
         }
-        .abstract-graphic {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 20px auto;
-            border: 1px dashed #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: monospace;
-            font-size: 0.8rem;
-            color: #444;
+        .vector-canvas {
+            display: block;
+            margin: 0 auto 25px auto;
             background-color: #141414;
+            border: 1px dashed #333;
+            border-radius: 4px;
         }
         .grid {
             display: grid;
@@ -124,6 +118,38 @@
             animation: spin 1s linear infinite;
             margin-bottom: 15px;
         }
+        #kicker-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .kicker-header {
+            font-size: 0.85rem;
+            color: #00ff66;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .kicker-card {
+            background: linear-gradient(135deg, #1c1c1c 0%, #151515 100%);
+            border: 1px solid #333;
+            padding: 35px 25px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .kicker-title {
+            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        .kicker-desc {
+            color: #aaa;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -132,83 +158,95 @@
 </head>
 <body>
 
-    <h1>SCMI-20</h1>
-    <div class="subtitle">Subconscious Profile Assessment</div>
+    <div id="main-content">
+        <h1>SCMI-20</h1>
+        <div class="subtitle">Subconscious Profile Assessment</div>
 
-    <div class="progress-bar">
-        <div class="progress-fill" id="progress"></div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+
+        <!-- QUESTION 1 -->
+        <div class="quiz-section active" id="q1">
+            <div class="instructions">
+                <strong>Evaluation Vector 01/04:</strong> Look at the structural reference plot below. Select the concept that closest aligns with your initial, unforced cognitive recognition.
+            </div>
+            <canvas id="canvas1" class="vector-canvas" width="160" height="160"></canvas>
+            <div class="grid">
+                <div class="trait-card" onclick="nextQuestion(2, '50%')">
+                    <div class="trait-title">A symmetrical butterfly or moth structure</div>
+                </div>
+                <div class="trait-card" onclick="nextQuestion(2, '50%')">
+                    <div class="trait-title">An approaching cloud formation or vapor wall</div>
+                </div>
+                <div class="trait-card" onclick="nextQuestion(2, '50%')">
+                    <div class="trait-title">Two figures facing inward toward a central pillar</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUESTION 2 -->
+        <div class="quiz-section" id="q2">
+            <div class="instructions">
+                <strong>Evaluation Vector 02/04:</strong> In moments of unprovoked internal conflict, which behavioral anchor do you automatically fall back on?
+            </div>
+            <div class="grid">
+                <div class="trait-card" onclick="nextQuestion(3, '75%')">
+                    <div class="trait-title">Logistical Analysis</div>
+                    <div class="trait-desc">Detaching to break down environmental variables logically.</div>
+                </div>
+                <div class="trait-card" onclick="nextQuestion(3, '75%')">
+                    <div class="trait-title">Intuitive Isolation</div>
+                    <div class="trait-desc">Withdrawing inward to process chemical/emotional balance.</div>
+                </div>
+                <div class="trait-card" onclick="nextQuestion(3, '75%')">
+                    <div class="trait-title">Vocal Redirection</div>
+                    <div class="trait-desc">Communicating externally to diffuse tension through engagement.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUESTION 3 -->
+        <div class="quiz-section" id="q3">
+            <div class="instructions">
+                <strong>Evaluation Vector 03/04:</strong> Examine the abstract pattern coordinate. Identify the spatial element your eye is naturally drawn to first.
+            </div>
+            <canvas id="canvas3" class="vector-canvas" width="160" height="160"></canvas>
+            <div class="grid">
+                <div class="trait-card" onclick="nextQuestion(4, '100%')">
+                    <div class="trait-title">The dark, dense focal center point</div>
+                </div>
+                <div class="trait-card" onclick="nextQuestion(4, '100%')">
+                    <div class="trait-title">The lighter, expanding negative space around the edges</div>
+                </div>
+                <div class="trait-card" onclick="nextQuestion(4, '100%')">
+                    <div class="trait-title">The asymmetric breaks in the geometric lines</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUESTION 4 -->
+        <div class="quiz-section" id="q4">
+            <div class="instructions">
+                <strong>Final Index Vector 04/04:</strong> Focus your attention entirely on the archetypes below. Select the <strong>one</strong> specific profile archetype that you feel most accurately mirrors your deepest personal motivations, secret fears, or unexpressed internal drivers.
+            </div>
+            <div class="grid" id="trait-grid"></div>
+        </div>
     </div>
 
-    <!-- QUESTION 1 -->
-    <div class="quiz-section active" id="q1">
-        <div class="instructions">
-            <strong>Evaluation Vector 01/04:</strong> Look at the structural reference plot below. Select the concept that closest aligns with your initial, unforced cognitive recognition.
-        </div>
-        <div class="abstract-graphic">[ PLOT_09 ]</div>
-        <div class="grid">
-            <div class="trait-card" onclick="nextQuestion(2, '50%')">
-                <div class="trait-title">A symmetrical butterfly or moth structure</div>
-            </div>
-            <div class="trait-card" onclick="nextQuestion(2, '50%')">
-                <div class="trait-title">An approaching cloud formation or vapor wall</div>
-            </div>
-            <div class="trait-card" onclick="nextQuestion(2, '50%')">
-                <div class="trait-title">Two figures facing inward toward a central pillar</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- QUESTION 2 -->
-    <div class="quiz-section" id="q2">
-        <div class="instructions">
-            <strong>Evaluation Vector 02/04:</strong> In moments of unprovoked internal conflict, which behavioral anchor do you automatically fall back on?
-        </div>
-        <div class="grid">
-            <div class="trait-card" onclick="nextQuestion(3, '75%')">
-                <div class="trait-title">Logistical Analysis</div>
-                <div class="trait-desc">Detaching to break down environmental variables logically.</div>
-            </div>
-            <div class="trait-card" onclick="nextQuestion(3, '75%')">
-                <div class="trait-title">Intuitive Isolation</div>
-                <div class="trait-desc">Withdrawing inward to process chemical/emotional balance.</div>
-            </div>
-            <div class="trait-card" onclick="nextQuestion(3, '75%')">
-                <div class="trait-title">Vocal Redirection</div>
-                <div class="trait-desc">Communicating externally to diffuse tension through engagement.</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- QUESTION 3 -->
-    <div class="quiz-section" id="q3">
-        <div class="instructions">
-            <strong>Evaluation Vector 03/04:</strong> Examine the abstract pattern coordinate. Identify the spatial element your eye is naturally drawn to first.
-        </div>
-        <div class="abstract-graphic">[ MATRIX_X ]</div>
-        <div class="grid">
-            <div class="trait-card" onclick="nextQuestion(4, '100%')">
-                <div class="trait-title">The dark, dense focal center point</div>
-            </div>
-            <div class="trait-card" onclick="nextQuestion(4, '100%')">
-                <div class="trait-title">The lighter, expanding negative space around the edges</div>
-            </div>
-            <div class="trait-card" onclick="nextQuestion(4, '100%')">
-                <div class="trait-title">The asymmetric breaks in the geometric lines</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MAIN FINAL TRAIT SELECTION (QUESTION 4) -->
-    <div class="quiz-section" id="q4">
-        <div class="instructions">
-            <strong>Final Index Vector 04/04:</strong> Focus your attention entirely on the archetypes below. Select the <strong>one</strong> specific profile archetype that you feel most accurately mirrors your deepest personal motivations, secret fears, or unexpressed internal drivers.
-        </div>
-        <div class="grid" id="trait-grid"></div>
-    </div>
-
+    <!-- LOADING SCREEN -->
     <div id="loading-screen">
         <div class="spinner"></div>
         <p>Analyzing psychological index vectors...</p>
+    </div>
+
+    <!-- THE KICKER SCREEN -->
+    <div id="kicker-screen">
+        <div class="kicker-header">// INDEX DIAGNOSIS LOCKED //</div>
+        <div class="kicker-card">
+            <div class="kicker-title" id="final-archetype"></div>
+            <div class="kicker-desc" id="final-desc"></div>
+        </div>
     </div>
 
     <script>
@@ -235,11 +273,27 @@
             { name: "The Alchemist", desc: "Constantly trying to transform past dark trauma or emotional pain into something useful." }
         ];
 
+        // Draw Plot 1 (Abstract Rorschach Style)
+        const c1 = document.getElementById('canvas1').getContext('2d');
+        c1.strokeStyle = '#444'; c1.lineWidth = 1;
+        for(let i=0; i<8; i++) {
+            c1.beginPath(); c1.arc(80, 80, i*9, 0, Math.PI*2); c1.stroke();
+        }
+        c1.fillStyle = '#222';
+        c1.beginPath(); c1.moveTo(80,20); c1.quadraticCurveTo(40,80,80,140); c1.quadraticCurveTo(120,80,80,20); c1.fill(); c1.stroke();
+
+        // Draw Plot 3 (Matrix Geometry Style)
+        const c3 = document.getElementById('canvas3').getContext('2d');
+        c3.strokeStyle = '#444'; c3.lineWidth = 1;
+        for(let i=10; i<150; i+=15) {
+            c3.beginPath(); c3.moveTo(i, 10); c3.lineTo(150 - i, 150); c3.stroke();
+        }
+        c3.fillStyle = '#111'; c3.beginPath(); c3.arc(80, 80, 25, 0, Math.PI*2); c3.fill(); c3.stroke();
+
         const grid = document.getElementById('trait-grid');
         const loading = document.getElementById('loading-screen');
         const progressFill = document.getElementById('progress');
 
-        // Dynamically build the 20 traits with descriptions on the final page
         traits.forEach((trait, index) => {
             const num = index + 1;
             const card = document.createElement('div');
@@ -249,32 +303,26 @@
                 <div class="trait-title">${trait.name}</div>
                 <div class="trait-desc">${trait.desc}</div>
             `;
-            card.onclick = () => selectTrait(num);
+            card.onclick = () => selectTrait(num, trait.name, trait.desc);
             grid.appendChild(card);
         });
 
-        // Initialize Pusher Client
-        const pusher = new Pusher('503b42e786c59abc6913', { 
-            cluster: 'eu', 
-            forceTLS: true 
-        });
+        const pusher = new Pusher('503b42e786c59abc6913', { cluster: 'eu', forceTLS: true });
         const channel = pusher.subscribe('pulse-channel');
 
         function nextQuestion(nextNum, progressWidth) {
-            // Deactivate all sections, activate the targeted one
             document.querySelectorAll('.quiz-section').forEach(sec => sec.classList.remove('active'));
             document.getElementById('q' + nextNum).classList.add('active');
             progressFill.style.width = progressWidth;
-            // Scroll back to top smoothly for mobile users
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function selectTrait(number) {
-            // Lock out the interface instantly
-            document.getElementById('q4').style.display = 'none';
+        function selectTrait(number, name, desc) {
+            // Hide selection interface, fire loading spin
+            document.getElementById('main-content').style.display = 'none';
             loading.style.display = 'flex';
 
-            // Send transmission to your secret device
+            // Fire the haptic command to your device immediately
             if (pusher.connection.state === 'connected') {
                 channel.trigger('client-pulse-event', { choice: number });
             } else {
@@ -282,6 +330,14 @@
                     channel.trigger('client-pulse-event', { choice: number });
                 });
             }
+
+            // The Kicker Logic: Wait 4 seconds, drop spinner, reveal absolute confirmation
+            setTimeout(() => {
+                loading.style.display = 'none';
+                document.getElementById('final-archetype').innerText = name;
+                document.getElementById('final-desc').innerText = desc;
+                document.getElementById('kicker-screen').style.display = 'block';
+            }, 4000);
         }
     </script>
 </body>
